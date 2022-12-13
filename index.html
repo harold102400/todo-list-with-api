@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <script src="./src/index.js" defer></script>
+    <link rel="stylesheet" href="./styles/index.css">
+</head>
+<body>
+    <main>
+        <section>
+            <article>
+                <h2>Task Form</h2>
+                <form class="form">
+                    <input type="text" name="id" hidden id="id">
+
+                    <label for="task">Task</label>
+                    <input type="text" id="task" name="task" placeholder="task"> 
+                    
+                    <label for="description">Description</label>
+                    <input type="text" id="description" name="description" placeholder="description"> 
+                    
+                    <label for="status">Status</label>
+                    <input type="text" id="status" name="status" placeholder="status"> 
+                    
+                    <label for="createdAt">Creation date</label>
+                    <input type="date" id="createdat" name="createdat"> 
+                    
+                    <label for="completedAt">Completion date</label>
+                    <input type="date" id="completedat" name="completedat"> 
+                    
+                    <label for="updatedAt">updated at</label>
+                    <input type="date" id="updatedat" name="updatedat"> 
+
+                    <input type="submit" id="submit" name="submit" value="Submit"> 
+                    <!-- <button type="submit">enviar</button> -->
+                </form>
+            </article>
+            <article class="data-request">
+                <table class="crud-table">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </article>
+              <!-- <template id="sub-container">
+                <tr>
+                  <td class="id"></td>
+                  <td class="task"></td>
+                  <td class="description"></td>
+                  <td class="status"></td>
+                  <td class="createdat"></td>
+                  <td class="completedat"></td>
+                  <td class="updatedat"></td>
+                  
+                  <td>
+                    <button class="edit">Editar</button>
+                    <button class="delete">Eliminar</button>
+                  </td>
+                </tr>
+              </template> -->
+            <article>
+                <div id="sub-container">
+                    <ul class="tasks">
+                        
+                    </ul>
+
+                </div>
+
+            </article>
+        </section>
+    </main>
+</body>
+</html>
+<!-- 
+<ul class="tasks" style="display: none;">
+    <li class="id"></li>
+    <li class="task"></li>
+    <li class="description"></li>
+    <li class="status"></li>
+    <li class="createdat"></li>
+    <li class="completedat"></li>
+    <li class="updatedat"></li>
+    <button class="edit">edit</button>
+    <button class="delete">delete</button>
+</ul> -->
