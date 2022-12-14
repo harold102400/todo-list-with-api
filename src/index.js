@@ -1,22 +1,39 @@
 const form = document.querySelector(".form");
 const submitBtn = document.querySelector("#submit");
 let allTodos = [];
+// Refactor del diablo
+
+const getFormData = (form) => {
+  const data = {
+    id: form.children.id.value,
+    task: form.children.task.value,
+    description: form.children.description.value,
+    status: undefined,
+    createdAt: undefined,
+    updatedAt: undefined,
+    completedAt: undefined,
+  };
+  return data;
+};
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
   const inputHidden = document.getElementById("id");
-  const data = {
-    task: document.getElementById("task").value,
-    description: document.getElementById("description").value,
-    status: document.getElementById("status").value,
-    createdAt: document.getElementById("createdat").value,
-    updatedAt: document.getElementById("updatedat").value,
-    completedAt: document.getElementById("completedat").value,
-  };
   if (inputHidden.value === "") {
+    const data = getFormData(e.target);
+    data.status = "pending";
+    data.createdAt = new Date().toISOString();
     createNewTask(data);
   } else {
-    data.id = inputHidden.value;
+    // antes de editar buscar el todo anterior y copiar todos los valores en data
+    // e.target seria el elemento al que se le pone el evento
+    // e.currentTarget este seria el elemento al que se le hizo el evento
+    // console.log(e.currentTarget);
+    const data = getFormData(e.target);
+    const oldTask = allTodos.find((task) => task.id === parseInt(data.id));
+    data.createdAt = oldTask.createdAt;
+    data.status = oldTask.status;
+    data.updatedAt = new Date().toISOString();
     editNewTask(inputHidden.value, data);
   }
   form.reset();
@@ -82,6 +99,7 @@ const showTodosOnHtml = (task) => {
     <li class="updatedat">${task.updatedAt}</li>
     <button class="edit" onclick='setEdit(${task.id})' >edit</button>
     <button class="delete" onclick ='deleteNewTask(${task.id})'>delete</button>
+    <button class="complete" onclick = 'completeBtn(${task.id})'>completed</button>
 </ul>`;
 };
 
@@ -101,7 +119,6 @@ const setInputValue = (inputid, value) => {
 };
 
 const createNewTask = async (task) => {
-
   const res = await fetch("http://localhost:3000/todos", {
     method: "POST",
     headers: {
@@ -115,14 +132,13 @@ const createNewTask = async (task) => {
 };
 
 const deleteNewTask = async (id) => {
-   await fetch(`http://localhost:3000/todos/${id}`, {
+  await fetch(`http://localhost:3000/todos/${id}`, {
     method: "DELETE",
   });
   removeTask(id);
 };
 
 const editNewTask = async (id, task) => {
-
   await fetch(`http://localhost:3000/todos/${id}`, {
     method: "PUT",
     headers: {
@@ -133,3 +149,46 @@ const editNewTask = async (id, task) => {
 
   updateTask(id, task);
 };
+
+const completeBtn = async (id) => {
+  const task = allTodos.find((task) => {
+    const trueorfalse = task.id === parseInt(id)
+    return trueorfalse
+  });
+  task.status = "completed";
+  task.completedAt = new Date().toISOString();
+  await completeTodo(task, id)
+};
+
+const completeTodo = async (todo, id) => {
+  await fetch(`http://localhost:3000/todos/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(todo),
+  });
+  updateTask(id, todo)
+};
+const cancelButton = () => {
+  const cancelBtn = document.getElementById("cancelBtn");
+  form.reset();
+  return cancelBtn;
+};
+
+// Subir el codigo a Github
+// Tarea para arreglar, eliminar campos innecesarios
+// Agregar un boton para cancelar, ese boton tiene que reset el form
+// Los campos que borraste tienes que generarlo con sentido
+// Y agregar un boton que diga completar a cada tarea, ese boton le va a cambiar el status a la tarea (PATCH)
+
+// Tarea
+// Subir a github
+// Elimnar el boton completed cuando la tarea esta completada
+// Hacer que el boton reset funcione
+// Eliminar la tabla
+// Ponerle el nombre de los campos al lado a cada valor
+// Hacer un poco de css esa pagina ta asarosa
+// Subir a github
+// Validar que todos los campos del formulario esten llenos antes de crear o actualizar
+// Subir a github
