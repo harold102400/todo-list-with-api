@@ -17,14 +17,26 @@ const getFormData = (form) => {
 };
 
 form.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const inputHidden = document.getElementById("id");
+    e.preventDefault();
+    //necesito apuntar sobre el inputhidden
+    const inputHidden = document.getElementById("id");
+    const inputTask = document.getElementById('task');
+    const inputDescription = document.getElementById('description');
+    
+    if(inputTask.value === '' || inputDescription.value === ''){
+        const messageContainer = document.getElementById('sub-container')
+        const errorMessage = document.createElement('h1');
+        messageContainer.before(errorMessage);
+        errorMessage.innerText = "Please fill out the following information";
+        errorMessage.innerText.remove;
+        return
+    } 
   if (inputHidden.value === "") {
     const data = getFormData(e.target);
     data.status = "pending";
     data.createdAt = new Date().toISOString();
     createNewTask(data);
-  } else {
+} else {
     // antes de editar buscar el todo anterior y copiar todos los valores en data
     // e.target seria el elemento al que se le pone el evento
     // e.currentTarget este seria el elemento al que se le hizo el evento
@@ -35,8 +47,8 @@ form.addEventListener("submit", (e) => {
     data.status = oldTask.status;
     data.updatedAt = new Date().toISOString();
     editNewTask(inputHidden.value, data);
-  }
-  form.reset();
+}
+form.reset();
 });
 
 // Nombre de la funcion horrible
@@ -70,7 +82,7 @@ const updateTask = (id, task) => {
   if (taskIndex === -1) {
     return;
   }
-
+  //el metodo splice en este caso necesito apuntarlo
   allTodos.splice(taskIndex, 1, task);
   setTodos(allTodos);
 };
@@ -85,21 +97,58 @@ const setTodosHTML = (todos) => {
   subContainer.innerHTML = "";
   todos.forEach((data) => {
     subContainer.innerHTML += showTodosOnHtml(data);
+    console.log(data.status)
+    if (data.status !== 'completed'){
+        const getbtn = document.querySelector('.complete')
+        console.log(getbtn)
+        getbtn.style.color = 'green'
+        
+      }
   });
 };
 
 const showTodosOnHtml = (task) => {
   return `<ul class="tasks">
+    <ul class='task-container'>
+    <h2 class='task-title'>Id task</h2>
     <li class="id">${task.id}</li>
+    </ul>
+    <ul class='task-container'>
+    <h2 class='task-title'>Id task</h2>
     <li class="task">${task.task}</li>
+    </ul>
+
+    <ul class='task-container'>
+    <h2 class='task-title'>Id task</h2>
     <li class="description">${task.description}</li>
+    </ul>
+
+    <ul class='task-container'>
+    <h2 class='task-title'>Id task</h2>
     <li class="status">${task.status}</li>
+    </ul>
+
+    <ul class='task-container'>
+    <h2 class='task-title'>Id task</h2>
     <li class="createdat">${task.createdAt}</li>
+    </ul>
+
+    <ul class='task-container'>
+    <h2 class='task-title'>Id task</h2>
     <li class="completedat">${task.completedAt}</li>
+    </ul>
+
+    <ul class='task-container'>
+    <h2 class='task-title'>Id task</h2>
     <li class="updatedat">${task.updatedAt}</li>
-    <button class="edit" onclick='setEdit(${task.id})' >edit</button>
-    <button class="delete" onclick ='deleteNewTask(${task.id})'>delete</button>
-    <button class="complete" onclick = 'completeBtn(${task.id})'>completed</button>
+    </ul>
+    <div class='button-task-container'>
+    <button class="edit" onclick='setEdit(${task.id})' >Edit</button>
+    <button class="delete" onclick ='deleteNewTask(${task.id})'>Delete</button>
+    <button class="complete" onclick = 'completeBtn(${task.id})'>Completed</button>
+    </div>
+
+    
 </ul>`;
 };
 
@@ -158,6 +207,7 @@ const completeBtn = async (id) => {
   task.status = "completed";
   task.completedAt = new Date().toISOString();
   await completeTodo(task, id)
+  
 };
 
 const completeTodo = async (todo, id) => {

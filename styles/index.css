@@ -1,0 +1,71 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.tasks {
+    list-style: none;
+    padding: 0;
+    margin-top: 1rem;
+}
+
+.task-container {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: 0;
+}
+
+.task-title {
+    font-size: 1.2rem;
+}
+
+.task-container li {
+    font-size: 1.2rem;
+}
+
+.button-task-container {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.edit {
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    padding: 0.3rem;
+    cursor: pointer;
+    width: 100px;
+}
+
+.delete {
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    padding: 0.3rem;
+    cursor: pointer;
+    width: 100px;
+}
+.complete {
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    padding: 0.3rem;
+    cursor: pointer;
+    width: 100px;
+}
+
+.submit {
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    padding: 0.3rem;
+    cursor: pointer;
+    width: 100px;
+}
