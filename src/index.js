@@ -98,12 +98,12 @@ const setTodosHTML = (todos) => {
   todos.forEach((data) => {
     subContainer.innerHTML += showTodosOnHtml(data);
     console.log(data.status)
-    if (data.status !== 'completed'){
+   /*  if (data.status !== 'completed'){
         const getbtn = document.querySelector('.complete')
         console.log(getbtn)
         getbtn.style.color = 'green'
         
-      }
+      } */
   });
 };
 
@@ -114,32 +114,32 @@ const showTodosOnHtml = (task) => {
     <li class="id">${task.id}</li>
     </ul>
     <ul class='task-container'>
-    <h2 class='task-title'>Id task</h2>
+    <h2 class='task-title'>Name of the task</h2>
     <li class="task">${task.task}</li>
     </ul>
 
     <ul class='task-container'>
-    <h2 class='task-title'>Id task</h2>
+    <h2 class='task-title'>Description of the task</h2>
     <li class="description">${task.description}</li>
     </ul>
 
     <ul class='task-container'>
-    <h2 class='task-title'>Id task</h2>
+    <h2 class='task-title'> Status of the task</h2>
     <li class="status">${task.status}</li>
     </ul>
 
     <ul class='task-container'>
-    <h2 class='task-title'>Id task</h2>
+    <h2 class='task-title'>This task was created:</h2>
     <li class="createdat">${task.createdAt}</li>
     </ul>
 
     <ul class='task-container'>
-    <h2 class='task-title'>Id task</h2>
+    <h2 class='task-title'>This task was completed:</h2>
     <li class="completedat">${task.completedAt}</li>
     </ul>
 
     <ul class='task-container'>
-    <h2 class='task-title'>Id task</h2>
+    <h2 class='task-title'>This task was updated:</h2>
     <li class="updatedat">${task.updatedAt}</li>
     </ul>
     <div class='button-task-container'>
