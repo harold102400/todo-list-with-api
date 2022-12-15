@@ -1,5 +1,11 @@
 const form = document.querySelector(".form");
 const submitBtn = document.querySelector("#submit");
+const cancelBtn = document.querySelector('#cancel-btn')
+cancelBtn.addEventListener('click', ()=>{
+  console.log('hola')
+  form.reset()
+})
+console.log(cancelBtn)
 let allTodos = [];
 // Refactor del diablo
 
@@ -17,38 +23,39 @@ const getFormData = (form) => {
 };
 
 form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    //necesito apuntar sobre el inputhidden
-    const inputHidden = document.getElementById("id");
-    const inputTask = document.getElementById('task');
-    const inputDescription = document.getElementById('description');
-    
-    if(inputTask.value === '' || inputDescription.value === ''){
-        const messageContainer = document.getElementById('sub-container')
-        const errorMessage = document.createElement('h1');
-        messageContainer.before(errorMessage);
-        errorMessage.innerText = "Please fill out the following information";
-        errorMessage.innerText.remove;
-        return
-    } 
+  e.preventDefault();
+  //necesito apuntar sobre el inputhidden
+  const inputHidden = document.getElementById("id");
+  const inputTask = document.getElementById("task");
+  const inputDescription = document.getElementById("description");
+
+  const errorMessage = document.querySelector("#error-message");
+  errorMessage.innerText = "";
+
+  if (inputTask.value === "" || inputDescription.value === "") {
+    errorMessage.innerText = "Please fill out the following information";
+    return;
+  }
+
   if (inputHidden.value === "") {
     const data = getFormData(e.target);
     data.status = "pending";
     data.createdAt = new Date().toISOString();
     createNewTask(data);
-} else {
-    // antes de editar buscar el todo anterior y copiar todos los valores en data
-    // e.target seria el elemento al que se le pone el evento
-    // e.currentTarget este seria el elemento al que se le hizo el evento
-    // console.log(e.currentTarget);
-    const data = getFormData(e.target);
-    const oldTask = allTodos.find((task) => task.id === parseInt(data.id));
-    data.createdAt = oldTask.createdAt;
-    data.status = oldTask.status;
-    data.updatedAt = new Date().toISOString();
-    editNewTask(inputHidden.value, data);
-}
-form.reset();
+    form.reset();
+    return;
+  }
+  // antes de editar buscar el todo anterior y copiar todos los valores en data
+  // e.target seria el elemento al que se le pone el evento
+  // e.currentTarget este seria el elemento al que se le hizo el evento
+  // console.log(e.currentTarget);
+  const data = getFormData(e.target);
+  const oldTask = allTodos.find((task) => task.id === parseInt(data.id));
+  data.createdAt = oldTask.createdAt;
+  data.status = oldTask.status;
+  data.updatedAt = new Date().toISOString();
+  editNewTask(inputHidden.value, data);
+  form.reset();
 });
 
 // Nombre de la funcion horrible
@@ -97,8 +104,8 @@ const setTodosHTML = (todos) => {
   subContainer.innerHTML = "";
   todos.forEach((data) => {
     subContainer.innerHTML += showTodosOnHtml(data);
-    console.log(data.status)
-   /*  if (data.status !== 'completed'){
+    console.log(data.status);
+    /*  if (data.status !== 'completed'){
         const getbtn = document.querySelector('.complete')
         console.log(getbtn)
         getbtn.style.color = 'green'
@@ -108,7 +115,7 @@ const setTodosHTML = (todos) => {
 };
 
 const showTodosOnHtml = (task) => {
-  return `<ul class="tasks">
+  let html = `<ul class="tasks">
     <ul class='task-container'>
     <h2 class='task-title'>Id task</h2>
     <li class="id">${task.id}</li>
@@ -145,11 +152,15 @@ const showTodosOnHtml = (task) => {
     <div class='button-task-container'>
     <button class="edit" onclick='setEdit(${task.id})' >Edit</button>
     <button class="delete" onclick ='deleteNewTask(${task.id})'>Delete</button>
-    <button class="complete" onclick = 'completeBtn(${task.id})'>Completed</button>
-    </div>
+`;
 
-    
-</ul>`;
+
+  if (task.status !== "completed") {
+    html += `<button class="complete" onclick = 'completeBtn(${task.id})'>Completed</button>`;
+  }
+
+  html += `</div></ul>`;
+  return html;
 };
 
 const setEdit = (id) => {
@@ -201,13 +212,12 @@ const editNewTask = async (id, task) => {
 
 const completeBtn = async (id) => {
   const task = allTodos.find((task) => {
-    const trueorfalse = task.id === parseInt(id)
-    return trueorfalse
+    const trueorfalse = task.id === parseInt(id);
+    return trueorfalse;
   });
   task.status = "completed";
   task.completedAt = new Date().toISOString();
-  await completeTodo(task, id)
-  
+  await completeTodo(task, id);
 };
 
 const completeTodo = async (todo, id) => {
@@ -218,13 +228,12 @@ const completeTodo = async (todo, id) => {
     },
     body: JSON.stringify(todo),
   });
-  updateTask(id, todo)
+  updateTask(id, todo);
 };
-const cancelButton = () => {
-  const cancelBtn = document.getElementById("cancelBtn");
-  form.reset();
-  return cancelBtn;
-};
+/* const cancelButton = () => {
+  const cancelBtn = document.querySelectorAll(".input-task").forEach(task => task.innerText = 'red')
+  return cancelBtn
+}; */
 
 // Subir el codigo a Github
 // Tarea para arreglar, eliminar campos innecesarios
