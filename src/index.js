@@ -1,11 +1,9 @@
 const form = document.querySelector(".form");
 const submitBtn = document.querySelector("#submit");
-const cancelBtn = document.querySelector('#cancel-btn')
-cancelBtn.addEventListener('click', ()=>{
-  console.log('hola')
-  form.reset()
-})
-console.log(cancelBtn)
+const cancelBtn = document.querySelector("#cancel-btn");
+cancelBtn.addEventListener("click", () => {
+  form.reset();
+});
 let allTodos = [];
 // Refactor del diablo
 
@@ -24,11 +22,10 @@ const getFormData = (form) => {
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
-  //necesito apuntar sobre el inputhidden
   const inputHidden = document.getElementById("id");
   const inputTask = document.getElementById("task");
   const inputDescription = document.getElementById("description");
-
+  ///por que usar un span para error de message? por defecto es un inline-block y es para texto, otra alternativa small
   const errorMessage = document.querySelector("#error-message");
   errorMessage.innerText = "";
 
@@ -37,6 +34,9 @@ form.addEventListener("submit", (e) => {
     return;
   }
 
+  ///para quitar el error de message se puede poner un else pero para que el codigo quede mas limpio se puede poner debajo de la constante
+
+  //necesito apuntar sobre el inputhidden--> este input guarda el id de la tarea
   if (inputHidden.value === "") {
     const data = getFormData(e.target);
     data.status = "pending";
@@ -49,16 +49,19 @@ form.addEventListener("submit", (e) => {
   // e.target seria el elemento al que se le pone el evento
   // e.currentTarget este seria el elemento al que se le hizo el evento
   // console.log(e.currentTarget);
+  // por que hay que buscar el todo anterior? y si uso el find con el .id me devuelve la tarea completa?
   const data = getFormData(e.target);
-  const oldTask = allTodos.find((task) => task.id === parseInt(data.id));
+  const oldTask = allTodos.find((task) => task.id === parseInt(data.id));//este metodo va a buscar la tarea dentro del array(allTodos) y lo va a comparar si es verdadero te devuelve el elemento
   data.createdAt = oldTask.createdAt;
   data.status = oldTask.status;
+  data.completedAt = oldTask.completedAt
   data.updatedAt = new Date().toISOString();
   editNewTask(inputHidden.value, data);
   form.reset();
 });
 
 // Nombre de la funcion horrible
+//solicitando la informacion al servidor(Method: GET)
 const getTodos = async () => {
   const res = await fetch("http://localhost:3000/todos");
   const data = await res.json();
@@ -79,7 +82,7 @@ const removeTask = (id) => {
   });
   setTodos(newTasks);
 };
-
+///klk con este codigo///es lo mismo que el find y te devuelve el index si es falso devuelve -1 por lo tanto se uso un if para terminar el codigo
 const updateTask = (id, task) => {
   const taskIndex = allTodos.findIndex((todo) => {
     const trueorfalse = todo.id === parseInt(id);
@@ -153,7 +156,6 @@ const showTodosOnHtml = (task) => {
     <button class="edit" onclick='setEdit(${task.id})' >Edit</button>
     <button class="delete" onclick ='deleteNewTask(${task.id})'>Delete</button>
 `;
-
 
   if (task.status !== "completed") {
     html += `<button class="complete" onclick = 'completeBtn(${task.id})'>Completed</button>`;
