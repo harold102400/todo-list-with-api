@@ -1,124 +1,105 @@
-const form = document.querySelector(".form");
-const submitBtn = document.querySelector("#submit");
-const cancelBtn = document.querySelector("#cancel-btn");
-cancelBtn.addEventListener("click", () => {
-  form.reset();
-});
-let allTodos = [];
-// Refactor del diablo
-
-const getFormData = (form) => {
-  const data = {
-    id: form.children.id.value,
-    task: form.children.task.value,
-    description: form.children.description.value,
-    status: undefined,
-    createdAt: undefined,
-    updatedAt: undefined,
-    completedAt: undefined,
-  };
-  return data;
-};
-
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const inputHidden = document.getElementById("id");
-  const inputTask = document.getElementById("task");
-  const inputDescription = document.getElementById("description");
-  ///por que usar un span para error de message? por defecto es un inline-block y es para texto, otra alternativa small
-  const errorMessage = document.querySelector("#error-message");
-  errorMessage.innerText = "";
-
-  if (inputTask.value === "" || inputDescription.value === "") {
-    errorMessage.innerText = "Please fill out the following information";
-    return;
+class Todo {
+  constructor(
+    id,
+    task,
+    description,
+    status = "pending",
+    createdAt = new Date(),
+    updatedAt,
+    completedAt
+  ) {
+    this.id = Number(id);
+    this.task = task;
+    this.description = description;
+    this.status = status;
+    this.createdAt = createdAt.toISOString();
+    if (updatedAt) {
+      this.updatedAt = updatedAt.toISOString();
+    }
+    if (completedAt) {
+      this.completedAt = completedAt.toISOString();
+    }
   }
 
-  ///para quitar el error de message se puede poner un else pero para que el codigo quede mas limpio se puede poner debajo de la constante
+  editTask(task, description, updatedAt = new Date()) {
+    if (task) this.task = task;
+    if (description) this.description = description;
 
-  //necesito apuntar sobre el inputhidden--> este input guarda el id de la tarea
-  if (inputHidden.value === "") {
-    const data = getFormData(e.target);
-    data.status = "pending";
-    data.createdAt = new Date().toISOString();
-    createNewTask(data);
-    form.reset();
-    return;
+    this.updatedAt = updatedAt.toISOString();
   }
-  // antes de editar buscar el todo anterior y copiar todos los valores en data
-  // e.target seria el elemento al que se le pone el evento
-  // e.currentTarget este seria el elemento al que se le hizo el evento
-  // console.log(e.currentTarget);
-  // por que hay que buscar el todo anterior? y si uso el find con el .id me devuelve la tarea completa?
-  const data = getFormData(e.target);
-  const oldTask = allTodos.find((task) => task.id === parseInt(data.id));//este metodo va a buscar la tarea dentro del array(allTodos) y lo va a comparar si es verdadero te devuelve el elemento
-  data.createdAt = oldTask.createdAt;
-  data.status = oldTask.status;
-  data.completedAt = oldTask.completedAt
-  data.updatedAt = new Date().toISOString();
-  editNewTask(inputHidden.value, data);
-  form.reset();
-});
 
-// Nombre de la funcion horrible
-//solicitando la informacion al servidor(Method: GET)
-const getTodos = async () => {
-  const res = await fetch("http://localhost:3000/todos");
-  const data = await res.json();
-  return data;
-};
-
-getTodos().then((data) => setTodos(data));
-
-const addTask = (task) => {
-  allTodos.push(task);
-  setTodosHTML(allTodos);
-};
-
-const removeTask = (id) => {
-  const newTasks = allTodos.filter((value) => {
-    const trueorfalse = value.id !== id;
-    return trueorfalse;
-  });
-  setTodos(newTasks);
-};
-///klk con este codigo///es lo mismo que el find y te devuelve el index si es falso devuelve -1 por lo tanto se uso un if para terminar el codigo
-const updateTask = (id, task) => {
-  const taskIndex = allTodos.findIndex((todo) => {
-    const trueorfalse = todo.id === parseInt(id);
-    return trueorfalse;
-  });
-
-  if (taskIndex === -1) {
-    return;
+  complete(completedAt = new Date()) {
+    this.status = 'completed'
+    this.completedAt = completedAt.toISOString()
   }
-  //el metodo splice en este caso necesito apuntarlo
-  allTodos.splice(taskIndex, 1, task);
-  setTodos(allTodos);
-};
 
-const setTodos = (todos) => {
-  allTodos = todos;
-  setTodosHTML(allTodos);
-};
+  static load({
+    id,
+    task,
+    description,
+    status,
+    createdAt,
+    updatedAt,
+    completedAt,
+  }) {
+    const todo = new Todo(id, task, description, status);
+    todo.createdAt = createdAt;
+    todo.updatedAt = updatedAt;
+    todo.completedAt = completedAt;
+    return todo;
+  }
 
-const setTodosHTML = (todos) => {
-  const subContainer = document.getElementById("sub-container");
-  subContainer.innerHTML = "";
-  todos.forEach((data) => {
-    subContainer.innerHTML += showTodosOnHtml(data);
-    console.log(data.status);
-    /*  if (data.status !== 'completed'){
-        const getbtn = document.querySelector('.complete')
-        console.log(getbtn)
-        getbtn.style.color = 'green'
-        
-      } */
-  });
-};
+  static fromForm(form) {
+    return new Todo(
+      form.children.id.value,
+      form.children.task.value,
+      form.children.description.value
+    );
+  }
+}
 
-const showTodosOnHtml = (task) => {
-  let html = `<ul class="tasks">
+class TodoList {
+  /**
+   *
+   * @param {Todo[]} todos
+   */
+  constructor(todos) {
+    this.todos = todos;
+  }
+
+  add(todo) {
+    this.todos.push(todo);
+  }
+
+  remove(id) {
+    this.todos = this.todos.filter((value) => value.id !== id);
+  }
+
+  find(id) {
+    return this.todos.find((todo) => todo.id === id);
+  }
+
+  update(id, task) {
+    const taskIndex = this.todos.findIndex((todo) => todo.id === parseInt(id));
+    if (taskIndex === -1) {
+      return;
+    }
+    console.log({ taskIndex, task });
+    //el metodo splice en este caso necesito apuntarlo
+    this.todos.splice(taskIndex, 1, task);
+  }
+
+  completeTodo(id, completedAt = new Date()) {
+    const todo = this.find(id);
+    if (!todo) return;
+    todo.complete(completedAt)
+  }
+
+  render() {
+    let html = "";
+
+    this.todos.forEach((task) => {
+      html += `<ul class="tasks">
     <ul class='task-container'>
     <h2 class='task-title'>Id task</h2>
     <li class="id">${task.id}</li>
@@ -153,103 +134,184 @@ const showTodosOnHtml = (task) => {
     <li class="updatedat">${task.updatedAt}</li>
     </ul>
     <div class='button-task-container'>
-    <button class="edit" onclick='setEdit(${task.id})' >Edit</button>
-    <button class="delete" onclick ='deleteNewTask(${task.id})'>Delete</button>
+    <button class="edit" onclick='app.setEdit(${task.id})' >Edit</button>
+    <button class="delete" onclick ='app.deleteTask(${task.id})'>Delete</button>
 `;
 
-  if (task.status !== "completed") {
-    html += `<button class="complete" onclick = 'completeBtn(${task.id})'>Completed</button>`;
+      if (task.status !== "completed") {
+        html += `<button class="complete" onclick = 'app.completeBtn(${task.id})'>Completed</button>`;
+      }
+
+      html += `</div></ul>`;
+    });
+    return html;
+  }
+}
+
+class TodoService {
+  constructor(apiUrl) {
+    this.url = apiUrl;
   }
 
-  html += `</div></ul>`;
-  return html;
-};
+  async getTodos() {
+    const res = await fetch(this.url);
+    const data = await res.json();
+    return data;
+  }
 
-const setEdit = (id) => {
-  const task = allTodos.find((value) => {
-    const truthorfalse = value.id === id;
-    return truthorfalse;
-  });
-  setInputValue("id", task.id);
-  setInputValue("task", task.task);
-  setInputValue("description", task.description);
-};
+  async createTodo(todo) {
+    const res = await fetch(this.url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(todo),
+    });
 
-const setInputValue = (inputid, value) => {
-  const input = document.getElementById(inputid);
-  input.value = value;
-};
+    const newTodo = await res.json();
+    return newTodo;
+  }
 
-const createNewTask = async (task) => {
-  const res = await fetch("http://localhost:3000/todos", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(task),
-  });
+  async editTask(id, task) {
+    await fetch(`${this.url}/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(task),
+    });
+  }
 
-  const todo = await res.json();
-  addTask(todo);
-};
+  async deleteTask(id) {
+    await fetch(`${this.url}/${id}`, {
+      method: "DELETE",
+    });
+  }
 
-const deleteNewTask = async (id) => {
-  await fetch(`http://localhost:3000/todos/${id}`, {
-    method: "DELETE",
-  });
-  removeTask(id);
-};
+  async completeTodo(id, todo) {
+    await fetch(`http://localhost:3000/todos/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(todo),
+    });
+  }
+}
 
-const editNewTask = async (id, task) => {
-  await fetch(`http://localhost:3000/todos/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(task),
-  });
+//escucha evento de losbotones
 
-  updateTask(id, task);
-};
+class TodoApp {
+  /**
+   * @param {TodoList} todoList
+   * @param {TodoService} todoService
+   */
+  constructor(todoList, todoService) {
+    this.todoList = todoList;
+    this.todoService = todoService;
+    this.subContainer = document.querySelector("#sub-container");
+    this.form = document.querySelector(".form");
+    this.cancelBtn = document.querySelector("#cancel-btn");
+  }
 
-const completeBtn = async (id) => {
-  const task = allTodos.find((task) => {
-    const trueorfalse = task.id === parseInt(id);
-    return trueorfalse;
-  });
-  task.status = "completed";
-  task.completedAt = new Date().toISOString();
-  await completeTodo(task, id);
-};
+  async init() {
+    await this.initTodos();
+    this.initForm();
+    this.initCancelForm();
+    this.render();
+  }
 
-const completeTodo = async (todo, id) => {
-  await fetch(`http://localhost:3000/todos/${id}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(todo),
-  });
-  updateTask(id, todo);
-};
-/* const cancelButton = () => {
-  const cancelBtn = document.querySelectorAll(".input-task").forEach(task => task.innerText = 'red')
-  return cancelBtn
-}; */
+  async initTodos() {
+    const todos = await this.todoService.getTodos();
+    todos.forEach((todo) => {
+      this.todoList.add(Todo.load(todo));
+    });
+  }
 
-// Subir el codigo a Github
-// Tarea para arreglar, eliminar campos innecesarios
-// Agregar un boton para cancelar, ese boton tiene que reset el form
-// Los campos que borraste tienes que generarlo con sentido
-// Y agregar un boton que diga completar a cada tarea, ese boton le va a cambiar el status a la tarea (PATCH)
+  initForm() {
+    this.form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const inputHidden = document.getElementById("id");
+      const inputTask = document.getElementById("task");
+      const inputDescription = document.getElementById("description");
 
-// Tarea
-// Subir a github
-// Elimnar el boton completed cuando la tarea esta completada
-// Hacer que el boton reset funcione
-// Eliminar la tabla
-// Ponerle el nombre de los campos al lado a cada valor
-// Hacer un poco de css esa pagina ta asarosa
-// Subir a github
-// Validar que todos los campos del formulario esten llenos antes de crear o actualizar
-// Subir a github
+      const errorMessage = document.querySelector("#error-message");
+      errorMessage.innerText = "";
+
+      const isInvalidForm =
+        inputTask.value === "" || inputDescription.value === "";
+      if (isInvalidForm) {
+        errorMessage.innerText = "Please fill out the following information";
+        return;
+      }
+
+      const hasId = inputHidden.value === "";
+      if (hasId) return this.addTodo();
+
+      this.editTodo();
+    });
+  }
+
+  initCancelForm() {
+    this.cancelBtn.addEventListener("click", () => {
+      this.form.reset();
+    });
+  }
+
+  render() {
+    this.subContainer.innerHTML = this.todoList.render();
+  }
+
+  async addTodo() {
+    const todo = Todo.fromForm(this.form);
+    const newTodo = await this.todoService.createTodo(todo);
+    this.todoList.add(newTodo);
+    this.form.reset();
+    this.render();
+  }
+
+  async editTodo() {
+    const formTodo = Todo.fromForm(this.form);
+    const task = this.todoList.find(formTodo.id);
+    task.editTask(formTodo.task, formTodo.description, new Date());
+    await this.todoService.editTask(task.id, task);
+    this.todoList.update(task.id, task);
+    this.form.reset();
+    this.render();
+  }
+
+  async deleteTask(id) {
+    await this.todoService.deleteTask(id);
+    this.todoList.remove(id);
+    this.render();
+  }
+
+  async completeBtn(id) {
+    id = parseInt(id);
+    const task = {
+      id,
+      status: "completed",
+      completedAt: new Date().toISOString(),
+    };
+    await this.todoService.completeTodo(id, task);
+    this.todoList.completeTodo(id, new Date());
+    this.render();
+  }
+
+  setEdit(id) {
+    const task = this.todoList.find(id);
+    this.setInputValue("id", task.id);
+    this.setInputValue("task", task.task);
+    this.setInputValue("description", task.description);
+  }
+
+  setInputValue(inputid, value) {
+    const input = document.getElementById(inputid);
+    input.value = value;
+  }
+}
+
+const todoList = new TodoList([]);
+const todoService = new TodoService("http://localhost:3000/todos");
+const app = new TodoApp(todoList, todoService);
+app.init();
